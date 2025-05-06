@@ -1,8 +1,94 @@
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
+-- StarterPlayerScripts
 
-player:WaitForChild("Data")
+local DataStoreService = game:GetService("DataStoreService")
+local playerDataStore = DataStoreService:GetDataStore("PlayerData")
 
-if player.Data:FindFirstChild("level") then
-    player.Data.level.Value = 198
+local function saveData(player, data)
+    pcall(function()
+        playerDataStore:SetAsync(player.UserId .. "_Data", data)
+    end)
 end
+
+local function loadData(player)
+    local success, data = pcall(function()
+        return playerDataStore:GetAsync(player.UserId .. "_Data")
+    end)
+    return success and data or {XP = 0, MaxLevel = 0, Money = 0}
+end
+
+game.Players.PlayerAdded:Connect(function(player)
+    local leaderstats = Instance.new("Folder")
+    leaderstats.Name = "leaderstats"
+    leaderstats.Parent = player
+
+    local xpStat = Instance.new("IntValue")
+    xpStat.Name = "XP"
+    xpStat.Parent = leaderstats
+
+    local maxLevelStat = Instance.new("IntValue")
+    maxLevelStat.Name = "MaxLevel"
+    maxLevelStat.Parent = leaderstats
+
+    local moneyStat = Instance.new("IntValue")
+    moneyStat.Name = "Money"
+    moneyStat.Parent = leaderstats
+
+    local data = loadData(player)
+    xpStat.Value = data.XP
+    maxLevelStat.Value = data.MaxLevel
+    moneyStat.Value = data.Money
+
+    player.CharacterAdded:Connect(function(character)
+        character:WaitForChild("Humanoid").StateChanged:Connect(function()
+            saveData(player, {XP = xpStat.Value, MaxLevel = maxLevelStat.Value, Money = moneyStat.Value})
+        end)
+    end)
+
+    -- Create GUI
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Parent = player:WaitForChild("PlayerGui")
+
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(0, 200, 0, 100)
+    frame.Position = UDim2.new(0.5, -100, 0, 50)
+    frame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    frame.BorderSizePixel = 2
+    frame.Parent = screenGui
+
+    local xpLabel = Instance.new("TextLabel")
+    xpLabel.Size = UDim2.new(1, 0, 0.33, 0)
+    xpLabel.Position = UDim2.new(0, 0, 0, 0)
+    xpLabel.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
+    xpLabel.Text = "XP: " .. xpStat.Value
+    xpLabel.TextColor3 = Color3.fromRGB(0, 0, 0)
+    xpLabel.Parent = frame
+
+    local maxLevelLabel = Instance.new("TextLabel")
+    maxLevelLabel.Size = UDim2.new(1, 0, 0.33, 0)
+    maxLevelLabel.Position = UDim2.new(0, 0, 0.33, 0)
+    maxLevelLabel.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
+    maxLevelLabel.Text = "Max Level: " .. maxLevelStat.Value
+    maxLevelLabel.TextColor3 = Color3.fromRGB(0, 0, 0)
+    maxLevelLabel.Parent = frame
+
+    local moneyLabel = Instance.new("TextLabel")
+    moneyLabel.Size = UDim2.new(1, 0, 0.33, 0)
+    moneyLabel.Position = UDim2.new(0, 0, 0.66, 0)
+    moneyLabel.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
+    moneyLabel.Text = "Money: " .. moneyStat.Value
+    moneyLabel.TextColor3 = Color3.fromRGB(0, 0, 0)
+    moneyLabel.Parent = frame
+
+    -- Update GUI
+    xpStat.Changed:Connect(function(value)
+        xpLabel.Text = "XP: " .. value
+    end)
+
+    maxLevelStat.Changed:Connect(function(value)
+        maxLevelLabel.Text = "Max Level: " .. value
+    end)
+
+    moneyStat.Changed:Connect(function(value)
+        moneyLabel.Text = "Money: " .. value
+    end)
+end)
