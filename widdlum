@@ -1,40 +1,8 @@
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
-local Event = game:GetService("Workspace").ServerHandler.valuesetter
 
--- Wait for the player to be fully loaded
 player:WaitForChild("Data")
-player:WaitForChild("Data2")
-player:WaitForChild("leaderstats")
 
--- Function to set a specific value in the player's data
-local function setDataValue(dataType, valueName, newValue)
-    if dataType == "Data" and player:FindFirstChild(dataType) and player[dataType]:FindFirstChild(valueName) then
-        player[dataType][valueName].Value = newValue
-        print(valueName .. " set to " .. tostring(newValue) .. " in " .. dataType)
-    elseif dataType == "Data2" and player:FindFirstChild(dataType) then
-        for _, v in ipairs(player[dataType]:GetChildren()) do
-            if v.Name == valueName then
-                v.Value = newValue
-                print(valueName .. " set to " .. tostring(newValue) .. " in " .. dataType)
-                return
-            end
-        end
-        warn(valueName .. " not found in " .. dataType .. "!")
-    else
-        warn(dataType .. " or " .. valueName .. " not found!")
-    end
+if player.Data:FindFirstChild("level") then
+    player.Data.level.Value = 198
 end
-
--- Bypass checks and set max level
-setDataValue("Data", "level", 198)
-
--- Unlock all items
-for _, v in ipairs(player.Data2:GetChildren()) do
-    setDataValue("Data2", v.Name, 1)
-end
-
--- Give unlimited money
-player.leaderstats.Money.Value = 999999
-
-print("Max level, all items unlocked, and unlimited money set.")
