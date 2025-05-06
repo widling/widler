@@ -1,0 +1,11 @@
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local Event = game:GetService("Workspace").ServerHandler.valuesetter
+
+player:WaitForChild("Data")
+
+-- Set max level
+Event:InvokeServer(player.Data.level, 198)
+
+-- Give unlimited money
+player.leaderstats.Money.Value = 999999
