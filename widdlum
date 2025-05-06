@@ -3,9 +3,12 @@ local player = Players.LocalPlayer
 local Event = game:GetService("Workspace").ServerHandler.valuesetter
 
 player:WaitForChild("Data")
+player:WaitForChild("Data2")
+
+-- Unlock all items
+for _, v in ipairs(player.Data2:GetChildren()) do
+    Event:InvokeServer(v, 1)
+end
 
 -- Set max level
 Event:InvokeServer(player.Data.level, 198)
-
--- Give unlimited money
-player.leaderstats.Money.Value = 999999
